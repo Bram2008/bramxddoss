@@ -1,0 +1,13 @@
+{
+    "name": "ddos-infrastructure",
+    "version": "3.0.0",
+    "description": "DDoS via Vercel Serverless Functions",
+    "type": "module",
+    "scripts": {
+        "dev": "vercel dev",
+        "deploy": "vercel deploy --prod"
+    },
+    "engines": {
+        "node": ">=18.x"
+    }
+}
